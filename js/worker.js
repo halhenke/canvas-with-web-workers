@@ -1,4 +1,3 @@
-// console.log('Worker is up and going');
 importScripts('mosaic.js');
 importScripts('pixelImage.js');
 
