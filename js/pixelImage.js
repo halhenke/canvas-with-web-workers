@@ -68,3 +68,35 @@ PixelImage.prototype.imageScale = function(unscaledImage) {
     centerShiftX, centerShiftY, unscaledImage.width * ratio, unscaledImage.height * ratio);
 };
 
+PixelImage.prototype.sample = function(rect) {
+  var r, g, b, a;
+  var totalPixels = TILE_WIDTH * TILE_HEIGHT;
+  r = g = b = a = 0;
+  for (var i = 0; i < rect.data.length; i = i + 4) {
+    r += rect.data[i];
+    g += rect.data[i + 1];
+    b += rect.data[i + 2];
+    a += rect.data[i + 3];
+  }
+  r = Math.trunc(r / totalPixels);
+  g = Math.trunc(g / totalPixels);
+  b = Math.trunc(b / totalPixels);
+  return this.toHexURL(r, g, b);
+};
+
+PixelImage.prototype.toHexURL = function(red, green, blue) {
+  return '/color/'
+   + this.safeHexString(red)
+   + this.safeHexString(green)
+   + this.safeHexString(blue);
+};
+
+
+PixelImage.prototype.safeHexString = function(num) {
+  var hex = Number(num).toString(16);
+  if (hex.length !== 2) {
+    hex = '0' + hex;
+  }
+  return hex;
+};
+
