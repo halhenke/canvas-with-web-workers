@@ -100,3 +100,42 @@ PixelImage.prototype.safeHexString = function(num) {
   return hex;
 };
 
+
+PixelImage.prototype.rowByRow = function(rows) {
+  var row = rows.shift(rows);
+  if (row !== undefined) {
+    Promise.all(row).then(function(resolvedRow) {
+      this.rowRender(resolvedRow);
+      setTimeout(this.rowByRow.bind(this), this.rowDelay, rows);
+    }.bind(this));
+  }
+};
+
+PixelImage.prototype.rowRender = function(row) {
+  var imageRow = [];
+  for (var i = 0; i < row.length; i++) {
+    var block = row[i];
+    imageRow.push(blockImage(block));
+  }
+  // Change to render into a context first...
+  Promise.all(imageRow).
+    then(function(renderedRow) {
+      for (var j = 0; j < renderedRow.length; j++) {
+        this.context.drawImage(renderedRow[j].image, renderedRow[j].x, renderedRow[j].y, TILE_WIDTH, TILE_HEIGHT);
+      }
+    }.bind(this));
+};
+
+var blockImage = function(block) {
+  var img = new Image;
+  img.src = URL.createObjectURL(block.color);
+  return new Promise(function(resolve) {
+    img.onload = function() {
+      resolve({
+        image: img,
+        x: block.x,
+        y: block.y
+      });
+    };
+  });
+};
