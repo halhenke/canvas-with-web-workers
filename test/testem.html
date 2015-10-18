@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+     <link href="../node_modules/mocha/mocha.css" rel="stylesheet" />
+    <title>Mosaic</title>
+  </head>
+  <body>
+    <div id="mocha"></div>
+
+    <script type="text/javascript" src="../js/mosaic.js"></script>
+    <script type="text/javascript" src="../node_modules/mocha/mocha.js"></script>
+    <script type="text/javascript" src="../node_modules/chai/chai.js"></script>
+    <script type="text/javascript" src="../node_modules/lodash/index.js"></script>
+
+    <script>mocha.setup('bdd')</script>
+    <script type="text/javascript" src="client.js"></script>
+    <script>
+      mocha.checkLeaks();
+      mocha.globals(['jQuery']);
+      mocha.run();
+    </script>
+
+    <canvas id=mosaic width=640 height=960></canvas>
+
+  </body>
+</html>
