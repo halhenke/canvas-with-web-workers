@@ -2,5 +2,9 @@
   "extends": "airbnb/legacy",
   "env": {
     "browser": true
+  },
+  globals: {
+    "TILE_HEIGHT": true,
+    "TILE_WIDTH": true,
   }
 }
