@@ -53,3 +53,18 @@ PixelImage.prototype.canvasSection = function(sectionNum, startX, startY, sectio
   }
 };
 
+
+PixelImage.prototype.imageScale = function(unscaledImage) {
+  var hRatio = this.width / unscaledImage.width;
+  var vRatio = this.height / unscaledImage.height;
+  var ratio = Math.min( hRatio, vRatio );
+  var centerShiftX = ( this.width - unscaledImage.width * ratio ) / 2;
+  var centerShiftY = ( this.height - unscaledImage.height * ratio ) / 2;
+
+  //  If user chooses another image - clear the context
+  this.fakeContext.clearRect(0, 0, this.width, this.height);
+  this.context.clearRect(0, 0, this.width, this.height);
+  this.fakeContext.drawImage(unscaledImage, 0, 0, unscaledImage.width, unscaledImage.height,
+    centerShiftX, centerShiftY, unscaledImage.width * ratio, unscaledImage.height * ratio);
+};
+
