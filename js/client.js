@@ -16,5 +16,13 @@ window.onload = function() {
 reader.onload = function(e) {
   image.src = e.target.result;
   image.onload = function() {
+    /**
+     * Performance MEtrics
+     */
+    // console.profile('pixelate');
+    // console.time('pixelate');
+
+    pixelFixer = new PixelImage('mosaic');
+    pixelFixer.pixelate(image);
   };
 };
