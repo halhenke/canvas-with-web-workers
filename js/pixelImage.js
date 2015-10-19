@@ -17,9 +17,24 @@ function PixelImage(canvasID) {
   this.fakeCanvas.setAttribute('height', this.height);
   this.fakeContext = this.fakeCanvas.getContext('2d');
 
-  this.totalWorkers;
+  this.totalWorkers = 4;
+  this.myWorkers = [];
+  for (var i = 0; i < this.totalWorkers; i++) {
+    this.myWorkers[i] = new Worker('js/worker.js');
+    this.myWorkers[i].onmessage = this.workerDone.bind(this);
+  }
+  this.processedRows = 0;
 }
 
+PixelImage.prototype.workerDone = function(e) {
+  this.pixelatedImage.rows[e.data.section] = e.data.grid;
+  this.processedRows++;
+  if (this.processedRows === this.totalWorkers) {
+    this.rowByRow(this.pixelatedImage.rows.reduce(function(a, b) {
+      return a.concat(b);
+    }, []));
+  }
+};
 
 /**
  * Main function
@@ -51,6 +66,11 @@ PixelImage.prototype.canvasSection = function(sectionNum, startX, startY, sectio
     }
     sectionRows.push(row);
   }
+  this.myWorkers[sectionNum].postMessage(JSON.stringify({
+    type: 'colorize',
+    section: sectionNum,
+    data: sectionRows
+  }));
 };
 
 
