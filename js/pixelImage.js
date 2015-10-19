@@ -26,6 +26,11 @@ function PixelImage(canvasID) {
   this.processedRows = 0;
 }
 
+/**
+ * Listener to handle WebWorkers when
+ * they have finished their work
+ */
+
 PixelImage.prototype.workerDone = function(e) {
   this.pixelatedImage.rows[e.data.section] = e.data.grid;
   this.processedRows++;
@@ -73,6 +78,10 @@ PixelImage.prototype.canvasSection = function(sectionNum, startX, startY, sectio
   }));
 };
 
+/**
+ * Calculations to scale the image to fit within our canvas
+ * - use this info to render to our undisplayed canvas
+ */
 
 PixelImage.prototype.imageScale = function(unscaledImage) {
   var hRatio = this.width / unscaledImage.width;
@@ -88,6 +97,11 @@ PixelImage.prototype.imageScale = function(unscaledImage) {
     centerShiftX, centerShiftY, unscaledImage.width * ratio, unscaledImage.height * ratio);
 };
 
+/**
+ * Takes an ImageData representing a block of 16 x 16 pixels
+ * and returns the average colour for that block in a format
+ * suitable for the server
+ */
 PixelImage.prototype.sample = function(rect) {
   var r, g, b, a;
   var totalPixels = TILE_WIDTH * TILE_HEIGHT;
@@ -104,22 +118,11 @@ PixelImage.prototype.sample = function(rect) {
   return this.toHexURL(r, g, b);
 };
 
-PixelImage.prototype.toHexURL = function(red, green, blue) {
-  return '/color/'
-   + this.safeHexString(red)
-   + this.safeHexString(green)
-   + this.safeHexString(blue);
-};
-
-
-PixelImage.prototype.safeHexString = function(num) {
-  var hex = Number(num).toString(16);
-  if (hex.length !== 2) {
-    hex = '0' + hex;
-  }
-  return hex;
-};
-
+/**
+ * Takes an Array of rows to render and renders each
+ * with rowRender, calling itself recursively
+ * with a given interval
+ */
 
 PixelImage.prototype.rowByRow = function(rows) {
   var row = rows.shift(rows);
@@ -129,8 +132,19 @@ PixelImage.prototype.rowByRow = function(rows) {
       setTimeout(this.rowByRow.bind(this), this.rowDelay, rows);
     }.bind(this));
   }
+  // else {
+  //   /**
+  //    * Performance MEtrics
+  //    */
+  //   console.profileEnd('pixelate');
+  //   console.timeEnd('pixelate');
+  // }
 };
 
+/**
+ * Renders each row of stored data into the canvas by repeatedly
+ * calling drawRect on the canvas context
+ */
 PixelImage.prototype.rowRender = function(row) {
   var imageRow = [];
   for (var i = 0; i < row.length; i++) {
@@ -146,6 +160,10 @@ PixelImage.prototype.rowRender = function(row) {
     }.bind(this));
 };
 
+/**
+ * Translates from our blob to an Image we can
+ * render on the canvas
+ */
 var blockImage = function(block) {
   var img = new Image;
   img.src = URL.createObjectURL(block.color);
@@ -158,4 +176,28 @@ var blockImage = function(block) {
       });
     };
   });
+};
+
+/**
+ * Takes red, green and blue as numbers in rgb format
+ * and returns a URL in corresponding Hex format
+ */
+PixelImage.prototype.toHexURL = function(red, green, blue) {
+  return '/color/'
+   + this.safeHexString(red)
+   + this.safeHexString(green)
+   + this.safeHexString(blue);
+};
+
+/**
+ * Translates to hexadecimal format
+ * while ensuring that we pad with zero when needed
+ */
+
+PixelImage.prototype.safeHexString = function(num) {
+  var hex = Number(num).toString(16);
+  if (hex.length !== 2) {
+    hex = '0' + hex;
+  }
+  return hex;
 };
